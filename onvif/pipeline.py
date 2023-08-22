@@ -24,6 +24,8 @@ def pipeline():
     url = ""
     dev = "CPU"
     model = "horizontal-text-detection-0001.xml"
+    userid = ""
+    userpw = ""
 
     content_type = request.headers.get('Content-Type')
     if (content_type == 'application/json'):
@@ -38,6 +40,14 @@ def pipeline():
             dev = json["dev"]
         if "model" in json:
             model = json["model"]
+        if "user-id" in json:
+            userid = json["user-id"]
+        if "user-pw" in json:
+            userpw = json["user-pw"]
+
+        if src == "rtspsrc":
+            if userid != "":
+                src += f' user-id="{userid}" user-pw="{userpw}" '
 
         pipeline_cmd = create_pipeline(src=src, url=url, model=model, dev=dev)
         return pipeline_cmd + " created"

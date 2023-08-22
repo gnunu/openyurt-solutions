@@ -21,6 +21,9 @@ $ curl -X POST -H 'Content-Type: application/json' -d '{"src": "filesrc", "url":
 or,
 $ curl -X POST -H 'Content-Type: application/json' -d '{"src": "filesrc", "url": "bbc-fish.mp4", "model": "horizontal-text-detection-0001.xml", "dev": "AUTO"}' http://localhost:55555/pipeline
 
+send a rtsp stream:
+$ curl -X POST -H 'Content-Type: application/json' -d '{"src": "rtspsrc", "user-id": "admin", "user-pw":"passwd", "url": "rtsp://10.238.157.61:554/Streaming/Channels/101", "model": "horizontal-text-detection-0001.xml", "dev": "AUTO"}' http://localhost:55555/pipeline
+
 to deploy in k8s cluster:
 <<TODO>>
 
