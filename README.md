@@ -13,6 +13,7 @@ start the pipeline server:
 $ docker run --rm -p 55555:55555 dlstreamer-onvif:latest
 or with gpu access:
 $ docker run --rm -p 55555:55555 --device /dev/dri --group-add=$(stat -c "%g" /dev/dri/render* | uniq) dlstreamer-onvif:latest
+(render group is not static, so we need to add it on deployment)
 
 on client side:
 $ curl -X POST -H 'Content-Type: application/json' -d '{"src": "filesrc", "url": "bbc-fish.mp4", "model": "horizontal-text-detection-0001.xml", "dev": "CPU"}' http://localhost:55555/pipeline
