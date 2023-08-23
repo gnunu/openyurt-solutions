@@ -39,7 +39,7 @@ gvainference model=/home/dlstreamer/models/horizontal-text-detection-0001.xml de
 gvafpscounter ! gvawatermark ! videoconvert ! vaapih264enc ! h264parse ! flvmux ! rtmp2sink location=rtmp://<rtmp-service-ip>:1935/live/test
 
 use rest api (json):
-$ curl -X POST -H 'Content-Type: application/json' -d '{"src": "rtspsrc", "user-id": "admin", "user-pw":"passwd", "url": "rtsp://<camera-ip>:554/Streaming/Channels/101", "model": "horizontal-text-detection-0001.xml", "dev": "AUTO", "rtmp2sink": "rtmp://<rtmp-service-ip>:1935/live/test"}' http://<openvino-service-ip>:55555/pipeline
+$ curl -X POST -H 'Content-Type: application/json' -d '{"src": "rtspsrc", "user-id": "admin", "user-pw":"passwd", "url": "rtsp://<camera-ip>:554/Streaming/Channels/101", "model": "horizontal-text-detection-0001.xml", "dev": "AUTO", "rtmpsink": "rtmp://<rtmp-service-ip>:1935/live/test"}' http://<openvino-service-ip>:55555/pipeline
 
 ```
 

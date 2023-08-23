@@ -26,6 +26,7 @@ def pipeline():
     model = "horizontal-text-detection-0001.xml"
     userid = ""
     userpw = ""
+    sink = "fakesink async=false"
 
     content_type = request.headers.get('Content-Type')
     if (content_type == 'application/json'):
@@ -44,6 +45,9 @@ def pipeline():
             userid = json["user-id"]
         if "user-pw" in json:
             userpw = json["user-pw"]
+        if "rtmpsink" in json:
+            sts = json["rtmpsink"]
+            sink = f"gvawatermark ! videoconvert ! vaapih264enc ! h264parse ! flvmux ! rtmp2sink location={sts}"
 
         if src == "rtspsrc":
             if userid != "":
@@ -54,14 +58,14 @@ def pipeline():
     else:
         return 'Content-Type not supported!'
 
-def create_pipeline(src, url, model, dev):
+def create_pipeline(src, url, model, dev, sink):
     model = modelDir + model
     if src == "filesrc":
         url = videoDir + url
 
     pipeline_cmd = f'gst-launch-1.0 -v {src} location={url} ! decodebin ! videoconvert n-threads=4 ! \
 capsfilter caps="video/x-raw,format=BGRx" ! gvainference model-instance-id=nunu model={model} device={dev} ! \
-queue ! gvafpscounter ! fakesink async=false'
+queue ! gvafpscounter ! {sink}'
     pid = os.fork()
     if pid == 0:
         os.system(pipeline_cmd)
