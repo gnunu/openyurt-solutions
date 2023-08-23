@@ -53,7 +53,7 @@ def pipeline():
             if userid != "":
                 src += f' user-id="{userid}" user-pw="{userpw}" '
 
-        pipeline_cmd = create_pipeline(src=src, url=url, model=model, dev=dev)
+        pipeline_cmd = create_pipeline(src=src, url=url, model=model, dev=dev, sink=sink)
         return pipeline_cmd + " created"
     else:
         return 'Content-Type not supported!'
