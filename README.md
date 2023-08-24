@@ -43,7 +43,63 @@ $ curl -X POST -H 'Content-Type: application/json' -d '{"src": "rtspsrc", "user-
 
 ```
 
+Note: to use pushing stream feature (rtmp sink), GPU is used (vaapih264enc), so at least an iGPU should be present on the worker node.
+
 ### deploy in k8s cluster:
-<<TODO>>
+to use GPU, for video encoding and AI inference, intel-gpu-plugin should be deployed.
 
+```sh
+Install to nodes with NFD (Node Feature Disvovery), Monitoring and Shared-dev
+$ kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd?ref=v0.27.1'
+$ kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=v0.27.1'
+$ kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin/overlays/monitoring_shared-dev_nfd/?ref=v0.27.1'
 
+```
+to deploy workload and a nodeport service for access from outside:
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onvif-demo
+  labels:
+    app: onvif-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: onvif-demo
+  template:
+    metadata:
+      labels:
+        app: onvif-demo
+    spec:
+      containers:
+      - name: onvif-demo
+        image: aibox03.bj.intel.com:5000/dlstreamer-onvif:latest
+        imagePullPolicy: IfNotPresent
+        command: [ "/home/dlstreamer/openyurt-solutions/onvif/pipeline.py" ]
+        securityContext:
+          # note render group is not stable
+          runAsGroup: 105
+        resources:
+          limits:
+            gpu.intel.com/i915: 1
+        ports:
+        - containerPort: 55555
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: onvif-demo
+spec:
+  selector:
+    app: onvif-demo
+  type: NodePort
+  ports:
+  - name: http
+    port: 55555
+    targetPort: 55555
+    nodePort: 30036
+    protocol: TCP
+
+```
