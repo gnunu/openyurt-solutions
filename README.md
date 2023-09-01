@@ -23,7 +23,7 @@ or,
 $ curl -X POST -H 'Content-Type: application/json' -d '{"src": "filesrc", "url": "bbc-fish.mp4", "model": "horizontal-text-detection-0001.xml", "dev": "AUTO"}' http://<openvino-service-ip>:55555/pipeline
 
 send a rtsp stream:
-$ curl -X POST -H 'Content-Type: application/json' -d '{"src": "rtspsrc", "user-id": "admin", "user-pw":"passwd", "url": "rtsp://<camera-ip>:554/Streaming/Channels/101", "model": "horizontal-text-detection-0001.xml", "dev": "AUTO"}' http://<openvino-service-ip>:55555/pipeline
+$ curl -X POST -H 'Content-Type: application/json' -d '{"src": "rtspsrc", "user-id": "admin", "user-pw":"passwd", "url": "rtsp://<camera-ip>:554/Streaming/Channels/101", "framerate": "3", "model": "horizontal-text-detection-0001.xml", "dev": "AUTO"}' http://<openvino-service-ip>:55555/pipeline
 
 ```
 

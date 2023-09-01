@@ -79,7 +79,9 @@ USER dlstreamer
 
 ARG foo=
 # download models
-RUN curl -L --create-dir https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.bin -o ${DLS_HOME}/models/horizontal-text-detection-0001.bin https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/horizontal-text-detection-0001/FP32/horizontal-text-detection-0001.xml -o ${DLS_HOME}/models/horizontal-text-detection-0001.xml
+RUN curl -L --create-dir https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin -o ${DLS_HOME}/models/horizontal-text-detection-0001.bin https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml -o ${DLS_HOME}/models/horizontal-text-detection-0001.xml
+
+RUN curl -L --create-dir https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP16/product-detection-0001.bin -o ${DLS_HOME}/models/product-detection-0001.bin https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP16/product-detection-0001.xml -o ${DLS_HOME}/models/product-detection-0001.xml
 
 ARG bar=
 RUN cd ${DLS_HOME} \

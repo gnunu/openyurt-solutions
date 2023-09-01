@@ -28,11 +28,13 @@ RUN echo "deb [signed-by=/usr/share/keyrings/intel-sw-products.gpg] https://apt.
 
 ARG DPCPP_VER
 ARG MKL_VER
+ARG CCL_VER
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
     intel-oneapi-runtime-dpcpp-cpp=${DPCPP_VER} \
-    intel-oneapi-runtime-mkl=${MKL_VER}
+    intel-oneapi-runtime-mkl=${MKL_VER} \
+    intel-oneapi-runtime-ccl=${CCL_VER}
 
 ARG PYTHON
 RUN apt-get update && apt install -y software-properties-common
@@ -60,6 +62,8 @@ RUN pip install --upgrade intel-extension-for-tensorflow[gpu]
 RUN pip install notebook
 RUN pip install keras-cv tensorflow-datasets
 RUN pip install matplotlib ipywidgets
+
+RUN pip install torch==2.0.1a0 torchvision==0.15.2a0 intel_extension_for_pytorch==2.0.110+xpu -f https://developer.intel.com/ipex-whl-stable-xpu
 
 RUN useradd -ms /bin/bash -u 1000 -G video tensor
 

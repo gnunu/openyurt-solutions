@@ -27,6 +27,7 @@ def pipeline():
     userid = ""
     userpw = ""
     sink = "fakesink async=false"
+    framerate = "videoconvert n-threads=4"
 
     content_type = request.headers.get('Content-Type')
     if (content_type == 'application/json'):
@@ -37,6 +38,9 @@ def pipeline():
             return "url must not be null"
         if "src" in json:
             src = json["src"]
+        if "framerate" in json:
+            rate = json["framerate"]
+            framerate = f"videorate ! video/x-raw,framerate={rate}/1 ! videoconvert n-threads=4"
         if "dev" in json:
             dev = json["dev"]
         if "model" in json:
@@ -53,19 +57,17 @@ def pipeline():
             if userid != "":
                 src += f' user-id="{userid}" user-pw="{userpw}" '
 
-        pipeline_cmd = create_pipeline(src=src, url=url, model=model, dev=dev, sink=sink)
+        pipeline_cmd = create_pipeline(src=src, url=url, framerate=framerate, model=model, dev=dev, sink=sink)
         return pipeline_cmd + " created"
     else:
         return 'Content-Type not supported!'
 
-def create_pipeline(src, url, model, dev, sink):
+def create_pipeline(src, url, framerate, model, dev, sink):
     model = modelDir + model
     if src == "filesrc":
         url = videoDir + url
 
-    pipeline_cmd = f'gst-launch-1.0 -v {src} location={url} ! decodebin ! videoconvert n-threads=4 ! \
-capsfilter caps="video/x-raw,format=BGRx" ! gvainference model-instance-id=nunu model={model} device={dev} ! \
-queue ! gvafpscounter ! {sink}'
+    pipeline_cmd = f'gst-launch-1.0 -v {src} location={url} ! decodebin ! {framerate} ! gvadetect model-instance-id=nunu model={model} device={dev} ! gvawatermark ! gvafpscounter ! {sink}'
     pid = os.fork()
     if pid == 0:
         os.system(pipeline_cmd)
