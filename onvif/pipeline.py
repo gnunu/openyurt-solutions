@@ -27,7 +27,7 @@ def pipeline():
     userid = ""
     userpw = ""
     sink = "fakesink async=false"
-    framerate = "videoconvert n-threads=4"
+    framerate = "queue"
 
     content_type = request.headers.get('Content-Type')
     if (content_type == 'application/json'):
@@ -40,7 +40,7 @@ def pipeline():
             src = json["src"]
         if "framerate" in json:
             rate = json["framerate"]
-            framerate = f"videorate ! video/x-raw,framerate={rate}/1 ! videoconvert n-threads=4"
+            framerate = f"videorate ! video/x-raw,framerate={rate}/1 ! queue"
         if "dev" in json:
             dev = json["dev"]
         if "model" in json:
@@ -51,7 +51,7 @@ def pipeline():
             userpw = json["user-pw"]
         if "rtmpsink" in json:
             sts = json["rtmpsink"]
-            sink = f"gvawatermark ! videoconvert ! vaapih264enc ! h264parse ! flvmux ! rtmp2sink location={sts}"
+            sink = f"queue ! gvawatermark ! videoconvert ! vaapih264enc ! h264parse ! flvmux ! rtmp2sink location={sts}"
 
         if src == "rtspsrc":
             if userid != "":
@@ -67,7 +67,7 @@ def create_pipeline(src, url, framerate, model, dev, sink):
     if src == "filesrc":
         url = videoDir + url
 
-    pipeline_cmd = f'gst-launch-1.0 -v {src} location={url} ! decodebin ! {framerate} ! gvadetect model-instance-id=nunu model={model} device={dev} ! gvawatermark ! gvafpscounter ! {sink}'
+    pipeline_cmd = f'gst-launch-1.0 -v {src} location={url} ! decodebin ! {framerate} ! gvadetect model-instance-id=nunu model={model} device={dev} ! gvafpscounter ! {sink}'
     pid = os.fork()
     if pid == 0:
         os.system(pipeline_cmd)
