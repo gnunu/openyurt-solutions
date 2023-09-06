@@ -22,6 +22,7 @@ def hello():
 def pipeline_kill():
     kill_cmd = f"pkill gst-launch-1.0"
     os.system(kill_cmd)
+    return "pipeline killed"
 
 @app.route('/pipeline', methods=['POST'])
 def pipeline():
