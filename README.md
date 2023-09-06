@@ -55,7 +55,7 @@ $ kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes
 $ kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin/overlays/monitoring_shared-dev_nfd/?ref=v0.27.1'
 
 or, the simple way, deployed as daemonset:
-$ kubectl kubectl label node <node-name> intel.feature.node.kubernetes.io/gpu="true"
+$ kubectl label node <node-name> intel.feature.node.kubernetes.io/gpu="true"
 $ kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin?ref=v0.27.1'
 
 ```

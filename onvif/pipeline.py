@@ -18,6 +18,11 @@ app = Flask(__name__)
 def hello():
     return 'Hello, World!'
 
+@app.route('/pipeline-kill', methods=['POST'])
+def pipeline_kill():
+    kill_cmd = f"pkill gst-launch-1.0"
+    os.system(kill_cmd)
+
 @app.route('/pipeline', methods=['POST'])
 def pipeline():
     src = "rtspsrc"
