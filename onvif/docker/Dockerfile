@@ -1,28 +1,30 @@
 ARG http_proxy
 ARG https_proxy
 
-FROM ubuntu:22.04 as base
+FROM ubuntu:22.04 as ubuntu
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl gpg software-properties-common
+
+FROM ubuntu as base
 
 # install dlstreamer
 RUN curl -fsSL https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | gpg --dearmor --output /usr/share/keyrings/intel-sw-products.gpg
 RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/intel-sw-products.gpg] https://apt.repos.intel.com/openvino/2022 `. /etc/os-release && echo ${UBUNTU_CODENAME}` main" | tee /etc/apt/sources.list.d/intel-openvino-2022.list
 RUN curl -fsSL https://repositories.intel.com/graphics/intel-graphics.key | gpg --dearmor --output /usr/share/keyrings/intel-graphics.gpg
 RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/intel-graphics.gpg] https://repositories.intel.com/graphics/ubuntu `. /etc/os-release && echo ${UBUNTU_CODENAME}` arc" | tee /etc/apt/sources.list.d/intel-graphics.list
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y intel-dlstreamer-dev
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y intel-dlstreamer
 
-RUN /opt/intel/dlstreamer/install_dependencies/install_mqtt_client.sh
-RUN /opt/intel/dlstreamer/install_dependencies/install_kafka_client.sh
+# RUN /opt/intel/dlstreamer/install_dependencies/install_mqtt_client.sh
+# RUN /opt/intel/dlstreamer/install_dependencies/install_kafka_client.sh
 
 # install openvino
 RUN /opt/intel/dlstreamer/install_dependencies/install_openvino.sh
 
 # install oneapi runtime
-RUN echo "deb [signed-by=/usr/share/keyrings/intel-sw-products.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/intel-oneapi.list
-RUN apt-get update && apt-get install -y intel-level-zero-gpu level-zero intel-dlstreamer-dpcpp
+# RUN echo "deb [signed-by=/usr/share/keyrings/intel-sw-products.gpg] https://apt.repos.intel.com/oneapi all main" | tee /etc/apt/sources.list.d/intel-oneapi.list
+# RUN apt-get update && apt-get install -y intel-level-zero-gpu level-zero intel-dlstreamer-dpcpp
 
 RUN apt-get install -y vim clinfo vainfo git
 
@@ -70,18 +72,29 @@ ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${DPCPP_DIR}/lib:${DPCPP_DIR}/lib/x64:${
 RUN useradd -ms /bin/bash -u 1000 -G video dlstreamer
 
 
+FROM ubuntu as models
+
+ARG foo=bar
+# download models
+RUN curl -L --create-dir https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin -o /models/horizontal-text-detection-0001.bin https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml -o /models/horizontal-text-detection-0001.xml
+
+RUN curl -L --create-dir https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP16/product-detection-0001.bin -o /models/product-detection-0001.bin https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP16/product-detection-0001.xml -o /models/product-detection-0001.xml
+
+RUN curl -L --create-dir https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-detection-retail-0005/FP16/face-detection-retail-0005.bin -o /models/face-detection-retail-0005.bin https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.3/models_bin/1/face-detection-retail-0005/FP16/face-detection-retail-0005.xml -o /models/face-detection-retail-0005.xml
+
+
 FROM base
 
 ARG DLS_HOME=/home/dlstreamer
 
+RUN mkdir -p ${DLS_HOME}/models
+
+COPY --from=models /models ${DLS_HOME}/models
+
+RUN chown -R dlstreamer:dlstreamer ${DLS_HOME}/models
+
 WORKDIR ${DLS_HOME}
 USER dlstreamer
-
-ARG foo=
-# download models
-RUN curl -L --create-dir https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.bin -o ${DLS_HOME}/models/horizontal-text-detection-0001.bin https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/horizontal-text-detection-0001/FP16/horizontal-text-detection-0001.xml -o ${DLS_HOME}/models/horizontal-text-detection-0001.xml
-
-RUN curl -L --create-dir https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP16/product-detection-0001.bin -o ${DLS_HOME}/models/product-detection-0001.bin https://storage.openvinotoolkit.org/repositories/open_model_zoo/2022.1/models_bin/2/product-detection-0001/FP16/product-detection-0001.xml -o ${DLS_HOME}/models/product-detection-0001.xml
 
 ARG bar=
 RUN cd ${DLS_HOME} \
