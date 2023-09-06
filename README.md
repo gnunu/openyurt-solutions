@@ -1,7 +1,7 @@
 # openyurt-solutions
 
 ## onvif
-### build container image:
+### Build container image
 ```sh
 $ git clone https://github.com/gnunu/openyurt-solutions.git
 
@@ -27,7 +27,7 @@ $ curl -X POST -H 'Content-Type: application/json' -d '{"src": "rtspsrc", "user-
 
 ```
 
-### deploy rtmp server
+### Deploy rtmp server
 ```sh
 $ docker run -d -p 1935:1935 -p 8080:8080 alqutami/rtmp-hls
 (this one has fast response than the nginx one)
@@ -45,7 +45,7 @@ $ curl -X POST -H 'Content-Type: application/json' -d '{"src": "rtspsrc", "user-
 
 Note: to use pushing stream feature (rtmp sink), GPU is used (vaapih264enc), so at least an iGPU should be present on the worker node.
 
-### deploy in k8s cluster:
+### Deploy in k8s cluster
 to use GPU, for video encoding and AI inference, intel-gpu-plugin should be deployed.
 
 ```sh
@@ -53,6 +53,10 @@ Install to nodes with NFD (Node Feature Disvovery), Monitoring and Shared-dev
 $ kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd?ref=v0.27.1'
 $ kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/nfd/overlays/node-feature-rules?ref=v0.27.1'
 $ kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin/overlays/monitoring_shared-dev_nfd/?ref=v0.27.1'
+
+or, the simple way, deployed as daemonset:
+$ kubectl kubectl label node <node-name> intel.feature.node.kubernetes.io/gpu="true"
+$ kubectl apply -k 'https://github.com/intel/intel-device-plugins-for-kubernetes/deployments/gpu_plugin?ref=v0.27.1'
 
 ```
 to deploy workload and a nodeport service for access from outside:
@@ -75,7 +79,7 @@ spec:
     spec:
       containers:
       - name: onvif-demo
-        image: aibox03.bj.intel.com:5000/dlstreamer-onvif:latest
+        image: gnunu/dlstreamer-onvif:latest
         imagePullPolicy: IfNotPresent
         command: [ "/home/dlstreamer/openyurt-solutions/onvif/pipeline.py" ]
         securityContext:
@@ -103,3 +107,9 @@ spec:
     protocol: TCP
 
 ```
+
+### Models
+three models have been pre-installed:
+product-detection-0001.xml
+horizontal-text-detection-0001.xml
+face-detection-retail-0005.xml
