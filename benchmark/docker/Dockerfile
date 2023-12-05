@@ -11,11 +11,14 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl gpg
 FROM ubuntu as ov
 
 # install openvino
+ARG openvino_version
+ARG openvino_package
+
 RUN mkdir /opt/intel
-COPY l_openvino_toolkit_ubuntu22_2023.1.0.12185.47b736f63ed_x86_64.tgz /tmp
-RUN cd /opt/intel && tar xf /tmp/l_openvino_toolkit_ubuntu22_2023.1.0.12185.47b736f63ed_x86_64.tgz && mv l_openvino_toolkit_ubuntu22_2023.1.0.12185.47b736f63ed_x86_64 openvino_2023.1.0 && rm /tmp/l_openvino_toolkit_ubuntu22_2023.1.0.12185.47b736f63ed_x86_64.tgz
-RUN cd /opt/intel/openvino_2023.1.0 && ./install_dependencies/install_openvino_dependencies.sh -y && python3 -m pip install -r ./python/requirements.txt
-RUN ln -s /opt/intel/openvino_2023.1.0 /opt/intel/openvino_2023
+COPY ${openvino_package}.tgz /tmp
+RUN cd /opt/intel && tar xf /tmp/${openvino_package}.tgz && mv ${openvino_package} openvino_${openvino_version}.0 && rm /tmp/${openvino_package}.tgz
+RUN cd /opt/intel/openvino_${openvino_version}.0 && ./install_dependencies/install_openvino_dependencies.sh -y && python3 -m pip install -r ./python/requirements.txt
+RUN ln -s /opt/intel/openvino_${openvino_version}.0 /opt/intel/openvino_2023
 
 
 FROM scratch as base
